@@ -1,6 +1,14 @@
 {
-    "name": "JJJWeb", "version": "1.0.0", "keywords": [
-        "util", "functional", "server", "client", "browser"
-    ], "author": "edward", "contributors": [
-    ], "dependencies": {}
+    "name": "JJJWeb",
+    "version": "0.3.1",
+    "keywords": ["util", "functional", "server", "client", "browser"],
+    "author": "Edward Armstrong",
+    "contributors": [],
+    "dependencies": {},
+    "main": "./src/JJJRMISocket.js",
+    "files": ["src/**"],
+    "scripts": {
+        "cp": "copyfiles -f ../JJJRMI/dist/jjjrmi.partial.js public_html/src",
+        "pack-js": "npm pack"
+    }
 }
