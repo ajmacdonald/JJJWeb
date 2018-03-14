@@ -1,12 +1,22 @@
 {
     "name": "JJJWeb",
     "version": "0.3.1",
-    "keywords": ["util", "functional", "server", "client", "browser"],
+    "keywords": [
+        "util",
+        "functional",
+        "server",
+        "client",
+        "browser"
+    ],
     "author": "Edward Armstrong",
     "contributors": [],
-    "dependencies": {},
+    "dependencies": {
+        "rootpath": "^0.1.2"
+    },
     "main": "./src/JJJRMISocket.js",
-    "files": ["src/**"],
+    "files": [
+        "src/**"
+    ],
     "scripts": {
         "cp": "copyfiles -f ../JJJRMI/dist/jjjrmi.partial.js public_html/src",
         "pack-js": "npm pack"

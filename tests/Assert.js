@@ -1,5 +1,4 @@
-/* global Function */
-console.log("include Assert.js");
+
 
 repeat = function (string, count) {
     let s = "";
@@ -52,11 +51,6 @@ class Assert {
                 result.result = "FAILED";
                 result.exception = ex;
                 this.failed++;
-            }
-            else if (ex instanceof ServerSideExceptionMessage && this.expectedException.toLowerCase() === ex.exception.toLowerCase()) {
-                result.result = "PASSED";
-                this.expectedException = "";
-                this.passed++;
             }
             else if (this.expectedException !== "") {
                 result.result = "FAILED_EXCEPTION";

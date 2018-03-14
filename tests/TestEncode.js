@@ -1,9 +1,10 @@
-let Constants = require("./Constants");
-let Translator = require("jjjrmi").Translator;
-let Assert = require("./Assert");
-let HasHandler = require("./jjjrmi.test").HasHandler;
-let Handles_HasHandler = require("./jjjrmi.test").Handles_HasHandler;
-let Phonetic = require("./jjjrmi.test").Phonetic;
+require('rootpath')();
+let Constants = require("src/Constants");
+let Translator = require("src/Translator");
+let Assert = require("tests/Assert");
+let HasHandler = require("tests/jjjrmi.test").HasHandler;
+let Handles_HasHandler = require("tests/jjjrmi.test").Handles_HasHandler;
+let Phonetic = require("tests/jjjrmi.test").Phonetic;
 
 TestEncode = class TestEncode {
 	test_field_array(assert) {
