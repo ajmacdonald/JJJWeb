@@ -33,7 +33,6 @@ class Decoder {
             if (typeof aClass === "undefined") {
                 throw new Error("classname '" + className + "' not found");
             }
-
             result = aClass[fieldName];
         } else if (typeof this.json[Constants.ValueParam] !== "undefined") {
             result = this.json[Constants.ValueParam];

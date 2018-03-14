@@ -7,6 +7,10 @@ class BiMap {
         this.objectMap = new Map();
         this.reverseMap = new Map();
     }
+    clear(){
+        this.objectMap.clear();
+        this.reverseMap.clear();
+    }
     keys() {
         return this.objectMap.keys();
     }
@@ -59,6 +63,10 @@ class Translator {
 
         if (typeof classmap === "undefined") throw new Error("undefined classmap");
     }
+    clear(){
+        this.objectMap.clear();
+        this.tempReferences.clear();
+    }
     set(key, obj) {
         this.objectMap.set(key, obj);
     }
@@ -87,6 +95,7 @@ class Translator {
         return encoded;
     }
     decode(jsonObject) {
+        console.log("translator.decode");
         let result = undefined;
         new Decoder(jsonObject, this, this.jjjWebsocket, this.deferred, this.classmap).decode((r) => result = r);
 

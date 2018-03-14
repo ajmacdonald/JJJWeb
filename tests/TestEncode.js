@@ -170,7 +170,8 @@ TestEncode = class TestEncode {
 	test_field_object(assert) {
 		let translator = new Translator();
 		let encoded = translator.encode(new NestedWrap());
-		Assert.equals("C0", encoded[Constants.KeyParam]);
+
+        Assert.equals("C0", encoded[Constants.KeyParam]);
 		Assert.equals("ca.fa.jjjrmi.tests.translator.classes.NestedWrap", encoded[Constants.TypeParam]);
 		let fields = encoded[Constants.FieldsParam];
 
@@ -181,6 +182,7 @@ TestEncode = class TestEncode {
 	test_field_repeat(assert) {
 		let translator = new Translator();
 		let encoded = translator.encode(new RepeatField());
+
 		let fields = encoded[Constants.FieldsParam];
 		let field_1 = fields["booleanWrap1"];
 		let field_2 = fields["booleanWrap2"];
