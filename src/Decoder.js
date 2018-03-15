@@ -1,145 +1,119 @@
-/* global Constants, JJJRMISocket */
 let Constants = require("./Constants");
-
-class Decoder {
-    constructor(json, translator, jjjWebsocket, deferred, classmap) {
-        if (typeof json === "undefined") {
-            console.log(json);
-            throw new Error("undefined json object");
-        }
-
-        if (typeof json === "string") this.json = JSON.parse(json);
-        else this.json = json;
-        this.translator = translator;
-        this.jjjWebsocket = jjjWebsocket;
-        this.deferred = deferred;
-        this.classmap = classmap;
-
-        if (typeof deferred === "undefined") throw new Error("undefined deferred");
-        if (typeof classmap === "undefined") throw new Error("undefined classmap");
-    }
-    decode(callback) {
-        let result = undefined;
-
-        if (typeof this.json[Constants.TypeParam] !== "undefined" && this.json[Constants.TypeParam] === Constants.NullValue) {
-            result = null;
-        } else if (typeof this.json[Constants.PointerParam] !== "undefined") {
-            result = this.translator.get(this.json[Constants.PointerParam]);
-        } else if (typeof this.json[Constants.EnumParam] !== "undefined") {
-            let className = this.json[Constants.EnumParam];
-            let fieldName = this.json[Constants.ValueParam];
-            let aClass = this.classmap.get(className);
-
-            if (typeof aClass === "undefined") {
-                throw new Error("classname '" + className + "' not found");
-            }
-            result = aClass[fieldName];
-        } else if (typeof this.json[Constants.ValueParam] !== "undefined") {
-            result = this.json[Constants.ValueParam];
-        } else if (typeof this.json[Constants.ElementsParam] !== "undefined") {
-            result = new RestoredArray(this.json, this.translator, this.webSocket, this.deferred, this.classmap).toObject();
-        } else if (typeof this.json[Constants.FieldsParam] !== "undefined") {
-            result = new RestoredObject(this.json, this.translator, this.jjjWebsocket, this.deferred, this.classmap).toObject();
-        } else {
-            console.log("Unknown object type during decoding");
-            console.log(this.json);
-            console.log("+---------------------------------+");
-            window.jjjdebug = this.json;
-            throw new Error("Unknown object type during decoding; see window.jjjdebug");
-        }
-
-        if (typeof result !== "undefined") callback(result);
-        else {
-            this.deferred.push({
-                decoder: this,
-                callback: callback
-            });
-        }
-    }
-}
-
-class RestoredArray {
-    constructor(json, translator, webSocket, deferred, classmap) {
-        this.json = json;
-        this.translator = translator;
-        this.webSocket = webSocket;
-        this.elements = this.json[Constants.ElementsParam];
-        this.deferred = deferred;
-
-        this.restoreCount = 0;
-        this.retArray = [];
-        this.classmap = classmap;
-
-        if (typeof deferred === "undefined") throw new Error("undefined deferred");
-        if (typeof classmap === "undefined") throw new Error("undefined classmap");
-    }
-    toObject() {
-        this.decodeArray();
-        if (this.restoreCount === this.elements.length) return this.retArray;
-        return undefined;
-    }
-    decodeArray() {
-        for (let i = 0; i < this.elements.length; i++) {
-            let decoder = new Decoder(this.elements[i], this.translator, this.webSocket, this.deferred, this.classmap);
-            decoder.decode(function (result){
-                this.retArray[i] = result;
-                this.restoreCount++;
-            }.bind(this));
-        }
-    }
-    length() {
-        return this.elements.length;
-    }
-}
+let EncodedJSON = require("./EncodedJSON");
 
 class RestoredObject {
-    constructor(json, translator, jjjWebsocket, deferred, classmap) {
+    constructor(json, translator) {
         this.json = json;
         this.translator = translator;
-        this.jjjWebsocket = jjjWebsocket;
-        this.deferred = deferred;
-        this.classmap = classmap;
-
-        if (typeof deferred === "undefined") throw new Error("undefined deferred");
-        if (typeof classmap === "undefined") throw new Error("undefined classmap");
+        this.fields = json.get(Constants.FieldsParam);
     }
-    decodeField(field, callback) {
-        let decoder = new Decoder(this.json[Constants.FieldsParam][field], this.translator, this.jjjWebsocket, this.deferred, this.classmap);
-        decoder.decode(callback);
-    }
-    toObject(object = null) {
-        let className = this.json[Constants.TypeParam];
-        let aClass = this.classmap.get(className);
+    decode() {
+        let className = this.json.get(Constants.TypeParam);
+        let aClass = this.translator.getClass(className);
 
-        if (typeof aClass === "undefined") throw new Error(`Class ${className} not found`);
-        if (object === null) object = new aClass();
+        let newInstance = null;
 
-        if (typeof object.constructor.__isTransient !== "function") {
-            window.err = {
-                className : className,
-                aClass : aClass,
-                object : object
-            }
-            throw new Error(`Field '__isTransient' of class '${object.constructor.name}' is not of type function, found type '${typeof object.constructor.__isTransient}'. (see window.err)`);
-        }
-
-        if (this.jjjWebsocket !== null && !object.constructor.__isTransient() && typeof this.json[Constants.KeyParam] !== "undefined") {
-            this.translator.set(this.json[Constants.KeyParam], object);
-
-            /* set websocket so object can call sever methods and vice versa - not applicable to transient objects */
-            object.__jjjWebsocket = this.jjjWebsocket;
-        }
-
-        if (typeof object.__decode === "function") {
-            object.__decode(this, this.translator, this.jjjWebsocket);
+        /* aready restored, retrieve restored object */;
+        /* if handler, create new object with handler */;
+        /* create new object from description */;
+        if (this.json.has(Constants.KeyParam) && this.translator.hasReference(this.json.get(Constants.KeyParam))) {
+            newInstance = this.translator.getReferredObject(this.json.get(Constants.KeyParam));
+            return newInstance;
+        } else if (this.translator.hasHandler(aClass)) {
+            let handler = this.translator.getHandler(aClass);
+            newInstance = handler.instatiate();
         } else {
-            for (let field in this.json[Constants.FieldsParam]) {
-                this.decodeField(field, (result) => object[field] = result);
+            newInstance = new aClass();
+        }
+
+        if (!aClass.__isTransient()) this.translator.addReference(this.json.get(Constants.KeyParam), newInstance);
+        else this.translator.addTempReference(this.json.get(Constants.KeyParam), newInstance);
+
+        if (this.translator.hasHandler(aClass)) {
+            let handler = this.translator.getHandler(aClass);
+            handler.decode(this, newInstance);
+        } else if (typeof newInstance.decode === "function") {
+            newInstance.decode(this);
+        } else {
+            for (let field in this.json.get(Constants.FieldsParam)) {
+                new Decoder(new EncodedJSON(this.json.get(Constants.FieldsParam)[field]), this.translator).decode(r=>newInstance[field] = r);
             }
         }
 
-        return object;
+        this.translator.notifyDecode(newInstance);
+        return newInstance;
+    }
+    decodeField(name) {
+        return this.translator.decode(this.fields.getJSONObject(name));
+    }
+    getJavaField(aClass, name) {
+        while (aClass !== Object.class) {
+            for (let field of aClass.getDeclaredFields()) {
+                if (field.getName() === name) return field;
+            }
+            aClass = aClass.getSuperclass();
+        }
+        return null;
+    }
+    getType() {
+        return this.json.get(Constants.TypeParam);
     }
 }
+;
+class RestoredArray {
+    constructor(json, translator) {
+        this.json = json;
+        this.translator = translator;
+        this.elements = json.get(Constants.ElementsParam);
+    }
+    decode() {
+        let newInstance = [];
 
+        for (let i = 0; i < this.elements.length(); i++) {
+            let element = this.elements.get(i);
+            new Decoder(new EncodedJSON(element), this.translator).decode(r=>newInstance[i] = r);
+        }
+
+        return newInstance;
+    }
+}
+;
+class Decoder {
+    constructor(json, translator) {
+        this.json = json;
+        this.translator = translator;
+    }
+    decode(callback) {
+        this.callback = callback;
+        /* the value is a primative, check expected type */;
+        /* expected type not found, refer to primitive type */;
+        if (this.json.has(Constants.TypeParam) && this.json.get(Constants.TypeParam) === Constants.NullValue) callback(null);
+        else if (this.json.has(Constants.PointerParam)) {
+            if (!this.translator.hasReference(this.json.get(Constants.PointerParam))) this.translator.deferDecoding(this);
+            let referredObject = this.translator.getReferredObject(this.json.get(Constants.PointerParam));
+            callback(referredObject);
+        } else if (this.json.has(Constants.EnumParam)) {
+            let className = this.json.get(Constants.EnumParam);
+            let fieldName = this.json.get(Constants.ValueParam);
+            let aClass = this.translator.getClass(className);
+            let result = aClass[fieldName];
+            callback(result);
+        } else if (this.json.has(Constants.ValueParam)) {
+            callback(this.json.get(Constants.ValueParam));
+        } else if (this.json.has(Constants.ElementsParam)) {
+            let array = new RestoredArray(this.json, this.translator).decode();
+            callback(array);
+        } else if (this.json.has(Constants.FieldsParam)) {
+            let object = new RestoredObject(this.json, this.translator).decode();
+            callback(object);
+        } else {
+            console.log(this.json.toString(2));
+            throw new Error("java.lang.RuntimeException");
+        }
+    }
+    resume() {
+        this.decode(this.callback);
+    }
+}
+;
 module.exports = Decoder;

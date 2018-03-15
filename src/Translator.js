@@ -1,6 +1,7 @@
 let Encoder = require("./Encoder");
 let Decoder = require("./Decoder");
 let ArrayList = require("./java-equiv/ArrayList");
+let EncodedJSON = require("./EncodedJSON");
 
 class BiMap {
     constructor() {
@@ -27,17 +28,17 @@ class BiMap {
     get(key) {
         return this.objectMap.get(key);
     }
-    set(key, value) {
+    put(key, value) {
         this.objectMap.set(key, value);
         this.reverseMap.set(value, key);
     }
     getKey(value) {
         return this.reverseMap.get(value);
     }
-    has(key) {
+    containsKey(key) {
         return this.objectMap.has(key);
     }
-    hasValue(value) {
+    containsValue(value) {
         return this.reverseMap.has(value);
     }
     /* remove target freom the translator replacing it with source, maintaining the same key */
@@ -49,88 +50,10 @@ class BiMap {
     }
 }
 
-class Translator {
-    constructor(classmap = null, jjjWebsocket = null) {
-        this.objectMap = new BiMap();
-        this.handlerMap = new Map();
-        this.tempReferences = new ArrayList();
-        this.next = -1;
-        this.jjjWebsocket = jjjWebsocket;
-        this.deferred = [];
-
-        if (classmap !== null) this.classmap = classmap;
-        else this.classmap = new Map();
-
-        if (typeof classmap === "undefined") throw new Error("undefined classmap");
+class ClassMap{
+    constructor(){
+        this.classmap = new Map();
     }
-    clear(){
-        this.objectMap.clear();
-        this.tempReferences.clear();
-    }
-    set(key, obj) {
-        this.objectMap.set(key, obj);
-    }
-    setTemp(key, obj) {
-        this.objectMap.set(key, obj);
-        this.tempReferences.add(key);
-    }
-    get(key) {
-        return this.objectMap.get(key);
-    }
-    clearTemp() {
-        for (let key of this.tempReferences) {
-            this.objectMap.removeByKey(key);
-        }
-        this.tempReferences.clear();
-    }
-    removeObject(obj) {
-        this.objectMap.removeByValue(obj);
-    }
-    removeKey(key) {
-        this.objectMap.removeByKey(key);
-    }
-    encode(object) {
-        let encoded = new Encoder(object, this, this).encode();
-        this.clearTemp();
-        return encoded;
-    }
-    decode(jsonObject) {
-        console.log("translator.decode");
-        let result = undefined;
-        new Decoder(jsonObject, this, this.jjjWebsocket, this.deferred, this.classmap).decode((r) => result = r);
-
-        while (this.deferred.length > 0) {
-            let defItem = this.deferred.shift();
-            defItem.decoder.decode(defItem.callback);
-        }
-
-        this.clearTemp();
-        return result;
-    }
-    has(key) {
-        return this.objectMap.has(key);
-    }
-    hasValue(value) {
-        return this.objectMap.hasValue(value);
-    }
-    hasObject(obj) {
-        return this.objectMap.hasValue(obj);
-    }
-    getObject(key) {
-        return this.objectMap.get(key);
-    }
-    getKey(obj) {
-        return this.objectMap.getKey(obj);
-    }
-    allocNextKey() {
-        this.next++;
-        return "C" + this.next;
-    }
-    /* remove target form he translator replacing it with source, maintaining the same key */
-    swap(source, target) {
-        this.objectMap.swap(source, target);
-    }
-
     registerPackage(pkg){
         for (let aClass in pkg) this.registerClass(pkg[aClass]);
     }
@@ -141,19 +64,108 @@ class Translator {
         this.classmap.set(aClass.__getClass(), aClass);
     }
 
-    setHandler(aClass, handler){
-        if (typeof aClass !== "function") throw new Error(`paramater 'class' of method 'registerClass' is '${typeof aClass.__getClass}', expected 'function'`);
-        if (typeof aClass.__getClass !== "function") throw new Error(`in Class ${aClass.constructor.name} method __getClass of type ${typeof aClass.__getClass}`);
-        this.handlerMap.set(aClass.__getClass(), handler);
-    }
-
-    hasHandler(object){
-        return this.handlerMap.has(object.constructor.__getClass());
-    }
-
-    getHandler(object){
-        return this.handlerMap.get(object.constructor.__getClass());
+    getClass(classname){
+        if (!this.classmap.has(classname)) throw new Error(`Class ${classname} not registered.`);
+        return this.classmap.get(classname);
     }
 }
 
+class Translator extends ClassMap{
+	constructor() {
+        super();
+		this.handlers = new Map();
+		this.encodeListeners = new ArrayList();
+		this.decodeListeners = new ArrayList();
+		this.deferred = new ArrayList();
+		this.objectMap = new BiMap();
+		this.tempReferences = new ArrayList();
+		this.nextKey = 0;
+	}
+	addDecodeListener(lst) {
+		this.decodeListeners.add(lst);
+	}
+	addEncodeListener(lst) {
+		this.encodeListeners.add(lst);
+	}
+	addReference(reference, object) {
+		this.objectMap.put(reference, object);
+	}
+	addTempReference(reference, object) {
+		this.objectMap.put(reference, object);
+		this.tempReferences.add(reference);
+	}
+	allocNextKey() {
+		return "C" + this.nextKey++;
+	}
+	clear() {
+		this.objectMap.clear();
+		this.tempReferences.clear();
+	}
+	clearTempReferences() {
+		for(let ref of this.tempReferences){
+			this.removeByKey(ref);
+		}
+		this.tempReferences.clear();
+	}
+	decode(json) {
+		let rvalue = null;
+        let eson = new EncodedJSON(json);
+		new Decoder(eson, this, null).decode(r => rvalue = r);
+		return rvalue;
+	}
+	deferDecoding(decoder) {
+		this.deferred.add(decoder);
+	}
+	encode(object) {
+		let toJSON = new Encoder(object, this).encode();
+		this.clearTempReferences();
+		return toJSON;
+	}
+	getAllReferredObjects() {
+		let values = this.objectMap.values();
+		return new ArrayList(values);
+	}
+	getHandler(aClass) {
+		return this.handlers.get(aClass.__getClass());
+	}
+	getReference(object) {
+		return this.objectMap.getKey(object);
+	}
+	getReferredObject(reference) {
+		return this.objectMap.get(reference);
+	}
+	hasHandler(aClass) {
+		return this.handlers.has(aClass.__getClass());
+	}
+	hasReference(reference) {
+		return this.objectMap.containsKey(reference);
+	}
+	hasReferredObject(object) {
+		return this.objectMap.containsValue(object);
+	}
+	notifyDecode(object) {
+		for(let decodeListener of this.decodeListeners){
+			decodeListener.accept(object);
+		}
+	}
+	notifyEncode(object) {
+		for(let encodeListener of this.encodeListeners){
+			encodeListener.accept(object);
+		}
+	}
+	removeByKey(key) {
+		if (!this.objectMap.containsKey(key))return false;
+		this.objectMap.removeByKey(key);
+		return true;
+	}
+	removeByValue(obj) {
+		if (!this.objectMap.containsValue(obj))return false;
+
+		this.objectMap.remove(this.objectMap.getKey(obj));
+		return true;
+	}
+	setHandler(aClass, handler) {
+		this.handlers.set(aClass.__getClass(), handler);
+	}
+};
 module.exports = Translator;

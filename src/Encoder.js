@@ -17,8 +17,8 @@ class Encoder {
             return new EncodedPrimitive(this.object).toJSON();
         }
         /* object is stored from previous transaction */
-        else if (this.translator.hasValue(this.object)) {
-            return new EncodedReference(this.translator.getKey(this.object)).toJSON();
+        else if (this.translator.hasReferredObject(this.object)) {
+            return new EncodedReference(this.translator.getReference(this.object)).toJSON();
         }
         /* is array */
         else if (this.object instanceof Array) {
@@ -29,8 +29,8 @@ class Encoder {
             return new EncodedEnum(this.object, this.translator, this.keys).toJSON();
         }
         /* handler has been registered */
-        else if (this.translator.hasHandler(this.object)){
-            let handler = this.translator.getHandler(this.object);
+        else if (this.translator.hasHandler(this.object.constructor)){
+            let handler = this.translator.getHandler(this.object.constructor);
             let encodedObject = new EncodedObject(this.object, this.translator, this.keys);
             handler.encode(encodedObject, this.object);
             return encodedObject.toJSON();
@@ -126,13 +126,13 @@ class EncodedObject {
         this.json[Constants.TypeParam] = this.object.constructor.__getClass();
         this.json[Constants.FieldsParam] = {};
 
-        let key = this.keys.allocNextKey();
+        let key = this.translator.allocNextKey();
         this.json[Constants.KeyParam] = key;
 
         if (this.object.constructor.__isTransient()) {
-            this.translator.setTemp(key, this.object);
+            this.translator.addTempReference(key, this.object);
         } else {
-            this.translator.set(key, this.object);
+            this.translator.addReference(key, this.object);
         }
 
         if (typeof object.constructor.__isTransient !== "function") {

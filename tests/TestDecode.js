@@ -132,12 +132,11 @@ TestDecode = class TestDecode {
 		let source = new RepeatField();
 		let encoded = translator.encode(source);
 
-        console.log(JSON.stringify(encoded, null, 2));
         translator.clear();
 
 		let decoded = translator.decode(encoded);
-//		Assert.notEquals(source, decoded);
-//		Assert.equals(decoded.booleanWrap1, decoded.booleanWrap2);
+		Assert.notEquals(source, decoded);
+		Assert.equals(decoded.booleanWrap1, decoded.booleanWrap2);
 	}
 	test_field_short() {
         let translator = new Translator();
