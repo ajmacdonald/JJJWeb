@@ -140,14 +140,6 @@ class JJJRMISocket {
         }
     }
 
-    copyFields(source, target){
-        for (let field in source){
-            if (!field.startsWith("__")){
-                target[field] = source[field];
-            }
-        }
-    }
-
     /**
      * Handles a server originated request.  Will throw a warning if the client does not have a method to handle the
      * request.

@@ -68,6 +68,12 @@ class ClassMap{
         if (!this.classmap.has(classname)) throw new Error(`Class ${classname} not registered.`);
         return this.classmap.get(classname);
     }
+
+    copyFrom(map){
+        for (let classname of map){
+            this.classmap.set(classname, map.get(classname));
+        }
+    }
 }
 
 class Translator extends ClassMap{
