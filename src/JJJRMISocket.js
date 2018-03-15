@@ -8,7 +8,7 @@ Console = console;
 class JJJRMISocket {
     constructor(socketName) {
         this.jjjSocketName = socketName;
-        this.translator = new Translator(JJJRMISocket.classes, this);
+        this.translator = new Translator();
         this.callback = {};
         this.flags = Object.assign(JJJRMISocket.flags);
         this.socket = null;
