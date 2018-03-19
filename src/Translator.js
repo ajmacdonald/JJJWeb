@@ -70,7 +70,7 @@ class ClassMap{
     }
 
     copyFrom(map){
-        for (let classname of map){
+        for (let classname of map.keys()){
             this.classmap.set(classname, map.get(classname));
         }
     }
@@ -114,6 +114,8 @@ class Translator extends ClassMap{
 		this.tempReferences.clear();
 	}
 	decode(json) {
+        if (typeof json === "string") json = JSON.parse(json);
+
 		let rvalue = null;
         let eson = new EncodedJSON(json);
 		new Decoder(eson, this, null).decode(r => rvalue = r);
@@ -151,12 +153,12 @@ class Translator extends ClassMap{
 	}
 	notifyDecode(object) {
 		for(let decodeListener of this.decodeListeners){
-			decodeListener.accept(object);
+			decodeListener(object);
 		}
 	}
 	notifyEncode(object) {
 		for(let encodeListener of this.encodeListeners){
-			encodeListener.accept(object);
+			encodeListener(object);
 		}
 	}
 	removeByKey(key) {

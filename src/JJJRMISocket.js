@@ -12,8 +12,14 @@ class JJJRMISocket {
         this.callback = {};
         this.flags = Object.assign(JJJRMISocket.flags);
         this.socket = null;
+        this.translator.copyFrom(JJJRMISocket.classes);
+
+        this.translator.addDecodeListener(obj=>obj.__jjjWebsocket = this);
+        this.translator.addEncodeListener(obj=>obj.__jjjWebsocket = this);
     }
+
     async connect(url) {
+        console.log(`this.flags.CONNECT = ${this.flags.CONNECT}`);
         if (this.flags.CONNECT) console.log(`${this.jjjSocketName} connecting`);
         if (!url) url = this.getAddress();
 
@@ -51,13 +57,13 @@ class JJJRMISocket {
      * @returns {undefined}
      */
     methodRequest(src, methodName, args) {
-        if (!this.translator.hasObject(src)){
+        if (!this.translator.hasReferredObject(src)){
             console.warn("see window.debug for source");
             window.debug = src;
             throw new Error(`Attempting to call server side method on non-received object: ${src.constructor.name}.${methodName}`);
         }
         let uid = this.nextUID++;
-        let ptr = this.translator.getKey(src);
+        let ptr = this.translator.getReference(src);
 
         let argsArray = [];
         for (let i in args) argsArray.push(args[i]);
@@ -72,7 +78,7 @@ class JJJRMISocket {
             if (this.flags.SENT) console.log(encodedPacket);
             let encodedString = JSON.stringify(encodedPacket, null, 4);
 
-            if (socket !== null) this.socket.send(encodedString);
+            if (this.socket !== null) this.socket.send(encodedString);
             else console.warn(`Socket "${this.socketName}" not connected.`);
         }.bind(this);
 

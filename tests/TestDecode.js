@@ -3,8 +3,6 @@ let Constants = require("src/Constants");
 let Translator = require("src/Translator");
 let Assert = require("tests/Assert");
 let testObjects = require("tests/jjjrmi.test");
-let HasHandler = require("tests/jjjrmi.test").HasHandler;
-let Handles_HasHandler = require("tests/jjjrmi.test").Handles_HasHandler;
 let Phonetic = require("tests/jjjrmi.test").Phonetic;
 
 TestDecode = class TestDecode {
