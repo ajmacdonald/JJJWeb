@@ -133,15 +133,15 @@ class JJJRMISocket {
             }
             /* server originated request */
             case jjjrmi.JJJMessageType.REMOTE:{
-                let target = this.translator.getObject(rmiMessage.ptr);
+                let target = this.translator.getReferredObject(rmiMessage.ptr);
                 this.remoteMethodCallback(target, rmiMessage.methodName, rmiMessage.args);
-                let response = new InvocationResponse(rmiMessage.uid, InvocationResponseCode.SUCCESS);
-                let encodedResponse = this.translator.encode(response);
-                let encodedString = JSON.stringify(encodedResponse, null, 4);
-
-                if (this.flags.ONMESSAGE) console.log(`Server side request: ${this.jjjSocketName} ${target.constructor.name}.${rmiMessage.methodName}`);
-                if (socket !== null) this.socket.send(encodedString);
-                else console.warn(`Socket "${this.socketName}" not connected.`);
+//                let response = new InvocationResponse(rmiMessage.uid, InvocationResponseCode.SUCCESS);
+//                let encodedResponse = this.translator.encode(response);
+//                let encodedString = JSON.stringify(encodedResponse, null, 4);
+//
+//                if (this.flags.ONMESSAGE) console.log(`Server side request: ${this.jjjSocketName} ${target.constructor.name}.${rmiMessage.methodName}`);
+//                if (socket !== null) this.socket.send(encodedString);
+//                else console.warn(`Socket "${this.socketName}" not connected.`);
                 break;
             }
             case jjjrmi.JJJMessageType.EXCEPTION:{
