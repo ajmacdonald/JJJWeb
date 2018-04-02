@@ -60,6 +60,18 @@ MethodResponse = class MethodResponse {
 	static __isEnum() {
 		return false;
 	}
+	getMethodName() {
+		return this.methodName;
+	}
+	getObjectPTR() {
+		return this.objectPTR;
+	}
+	getRvalue() {
+		return this.rvalue;
+	}
+	getUid() {
+		return this.uid;
+	}
 };
 jjjrmi.MethodResponse = MethodResponse;
 MethodRequest = class MethodRequest {
