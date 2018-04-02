@@ -1,5 +1,5 @@
 {
-    "name": "JJJRMI",
+    "name": "jjjrmi",
     "version": "0.3.1",
     "keywords": [
         "util",
@@ -18,7 +18,7 @@
         "src/**"
     ],
     "scripts": {
-        "cp": "copyfiles -f ../JJJRMI/dist/jjjrmi.partial.js public_html/src",
+        "cp": "copyfiles -f ../JJJRMI/dist/jjjrmi.partial.js src",
         "pack-js": "npm pack"
     }
 }

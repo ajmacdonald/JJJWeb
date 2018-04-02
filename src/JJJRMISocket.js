@@ -1,4 +1,4 @@
-/* global RMIMessageType */
+/* global JJJMessageType */
 let Translator = require("./Translator");
 let jjjrmi = require("./jjjrmi.partial");
 let ArrayList = require("./java-equiv/ArrayList");
@@ -18,8 +18,17 @@ class JJJRMISocket {
         this.translator.addEncodeListener(obj=>obj.__jjjWebsocket = this);
     }
 
+	getHandler(aClass) {
+		return this.translator.getHandler(aClass);
+	}
+	hasHandler(aClass) {
+		return this.translator.hasHandler(aClass);
+	}
+	setHandler(aClass, handler) {
+		this.translator.setHandler(aClass, handler);
+	}
+
     async connect(url) {
-        console.log(`this.flags.CONNECT = ${this.flags.CONNECT}`);
         if (this.flags.CONNECT) console.log(`${this.jjjSocketName} connecting`);
         if (!url) url = this.getAddress();
 
@@ -46,6 +55,10 @@ class JJJRMISocket {
         let pathname = window.location.pathname.substr(1);
         pathname = pathname.substr(0, pathname.indexOf("/"));
         return `${prequel}${window.location.host}/${pathname}/${this.jjjSocketName}`;
+    }
+
+    reset(){
+        this.translator.clear();
     }
 
     /**
@@ -77,6 +90,7 @@ class JJJRMISocket {
             let encodedPacket = this.translator.encode(packet);
             if (this.flags.SENT) console.log(encodedPacket);
             let encodedString = JSON.stringify(encodedPacket, null, 4);
+            if (this.flags.SENT && this.flags.VERBOSE) console.log(encodedString);
 
             if (this.socket !== null) this.socket.send(encodedString);
             else console.warn(`Socket "${this.socketName}" not connected.`);
@@ -91,26 +105,26 @@ class JJJRMISocket {
      * @returns {undefined}
      */
     onMessage(evt) {
-        let rmiMessage = this.translator.decode(evt.data);
         if (this.flags.RECEIVED && this.flags.VERBOSE){
             let json = JSON.parse(evt.data);
             console.log(JSON.stringify(json, null, 2));
         }
+        let rmiMessage = this.translator.decode(evt.data);
         if (this.flags.RECEIVED) console.log(rmiMessage);
 
         switch (rmiMessage.type) {
-            case jjjrmi.RMIMessageType.FORGET:{
+            case jjjrmi.JJJMessageType.FORGET:{
                 if (this.flags.CONNECT || this.flags.ONMESSAGE) console.log(this.jjjSocketName + " FORGET");
                 this.translator.removeKey(rmiMessage.key);
                 break;
             }
-            case jjjrmi.RMIMessageType.READY:{
+            case jjjrmi.JJJMessageType.READY:{
                 if (this.flags.CONNECT || this.flags.ONMESSAGE) console.log(this.jjjSocketName + " READY");
                 this.onready(rmiMessage.getRoot());
                 break;
             }
             /* client originated request */
-            case jjjrmi.RMIMessageType.LOCAL:{
+            case jjjrmi.JJJMessageType.LOCAL:{
                 if (this.flags.ONMESSAGE) console.log(`Response to client side request: ${this.jjjSocketName} ${rmiMessage.methodName}`);
                 let callback = this.callback[rmiMessage.uid];
                 delete(this.callback[rmiMessage.uid]);
@@ -118,7 +132,7 @@ class JJJRMISocket {
                 break;
             }
             /* server originated request */
-            case jjjrmi.RMIMessageType.REMOTE:{
+            case jjjrmi.JJJMessageType.REMOTE:{
                 let target = this.translator.getObject(rmiMessage.ptr);
                 this.remoteMethodCallback(target, rmiMessage.methodName, rmiMessage.args);
                 let response = new InvocationResponse(rmiMessage.uid, InvocationResponseCode.SUCCESS);
@@ -130,7 +144,7 @@ class JJJRMISocket {
                 else console.warn(`Socket "${this.socketName}" not connected.`);
                 break;
             }
-            case jjjrmi.RMIMessageType.EXCEPTION:{
+            case jjjrmi.JJJMessageType.EXCEPTION:{
                 if (!this.flags.SILENT) console.log(this.jjjSocketName + " EXCEPTION " + rmiMessage.methodName);
                 if (!this.flags.SILENT) console.warn(rmiMessage);
                 let callback = this.callback[rmiMessage.uid];
@@ -138,7 +152,7 @@ class JJJRMISocket {
                 callback.reject(rmiMessage);
                 break;
             }
-            case jjjrmi.RMIMessageType.REJECTED_CONNECTION:{
+            case jjjrmi.JJJMessageType.REJECTED_CONNECTION:{
                 if (this.flags.CONNECT || this.flags.ONMESSAGE) console.log(this.jjjSocketName + " REJECTED_CONNECTION");
                 this.onreject();
                 break;

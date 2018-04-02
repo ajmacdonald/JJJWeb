@@ -44,7 +44,7 @@ class RestoredObject {
         return newInstance;
     }
     decodeField(name) {
-        return this.translator.decode(this.fields.getJSONObject(name));
+        return this.translator.decode(this.fields[name]);
     }
     getJavaField(aClass, name) {
         while (aClass !== Object.class) {
@@ -69,8 +69,8 @@ class RestoredArray {
     decode() {
         let newInstance = [];
 
-        for (let i = 0; i < this.elements.length(); i++) {
-            let element = this.elements.get(i);
+        for (let i = 0; i < this.elements.length; i++) {
+            let element = this.elements[i];
             new Decoder(new EncodedJSON(element), this.translator).decode(r=>newInstance[i] = r);
         }
 

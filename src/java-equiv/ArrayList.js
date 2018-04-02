@@ -18,7 +18,7 @@ ArrayList = class ArrayList {
         for (let e of c) this.add(e);
     }
     isEmpty() {
-        return this.size === 0;
+        return this.size() === 0;
     }
     removeAll(c) {
         for (let e of c){

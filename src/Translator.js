@@ -118,7 +118,11 @@ class Translator extends ClassMap{
 
 		let rvalue = null;
         let eson = new EncodedJSON(json);
-		new Decoder(eson, this, null).decode(r => rvalue = r);
+		new Decoder(eson, this, null).decode(r =>{
+            while (!this.deferred.isEmpty()) this.deferred.remove(0).resume();
+            this.clearTempReferences();
+            rvalue = r;
+        });
 		return rvalue;
 	}
 	deferDecoding(decoder) {
@@ -136,14 +140,17 @@ class Translator extends ClassMap{
 	getHandler(aClass) {
 		return this.handlers.get(aClass.__getClass());
 	}
-	getReference(object) {
+	hasHandler(aClass) {
+		return this.handlers.has(aClass.__getClass());
+	}
+	setHandler(aClass, handler) {
+		this.handlers.set(aClass.__getClass(), handler);
+	}
+    getReference(object) {
 		return this.objectMap.getKey(object);
 	}
 	getReferredObject(reference) {
 		return this.objectMap.get(reference);
-	}
-	hasHandler(aClass) {
-		return this.handlers.has(aClass.__getClass());
 	}
 	hasReference(reference) {
 		return this.objectMap.containsKey(reference);
@@ -171,9 +178,6 @@ class Translator extends ClassMap{
 
 		this.objectMap.remove(this.objectMap.getKey(obj));
 		return true;
-	}
-	setHandler(aClass, handler) {
-		this.handlers.set(aClass.__getClass(), handler);
 	}
 };
 module.exports = Translator;
