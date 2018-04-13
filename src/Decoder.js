@@ -32,8 +32,8 @@ class RestoredObject {
         if (this.translator.hasHandler(aClass)) {
             let handler = this.translator.getHandler(aClass);
             handler.decode(this, newInstance);
-        } else if (typeof newInstance.decode === "function") {
-            newInstance.decode(this);
+        } else if (typeof newInstance.jjjDecode === "function") {
+            newInstance.jjjDecode(this);
         } else {
             for (let field in this.json.get(Constants.FieldsParam)) {
                 new Decoder(new EncodedJSON(this.json.get(Constants.FieldsParam)[field]), this.translator).decode(r=>newInstance[field] = r);
@@ -43,8 +43,8 @@ class RestoredObject {
         this.translator.notifyDecode(newInstance);
         return newInstance;
     }
-    decodeField(name) {
-        return this.translator.decode(this.fields[name]);
+    decodeField(name, callback) {
+        new Decoder(new EncodedJSON(this.fields[name]), this.translator).decode(r=>callback(r));
     }
     getJavaField(aClass, name) {
         while (aClass !== Object.class) {

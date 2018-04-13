@@ -3,6 +3,21 @@ let Constants = require("./Constants");
 
 class Encoder {
     constructor(object, translator, keys) {
+        if (object !== null && typeof object === "object" && !object instanceof Array) {
+            if (typeof object.constructor === "undefined") {
+                throw new Error(`Object missing constructor.`);
+            }
+            if (typeof object.constructor.__isTransient !== "function") {
+                throw new Error(`Class "${object.constructor.name}" missing method "__isTransient".`);
+            }
+            if (typeof object.constructor.__isEnum !== "function") {
+                throw new Error(`Class "${object.constructor.name}" missing method "__isEnum".`);
+            }
+            if (typeof object.constructor.__getClass !== "function") {
+                throw new Error(`Class "${object.constructor.name}" missing method "__getClass".`);
+            }
+        }
+        
         this.object = object;
         this.translator = translator;
         this.keys = keys;
@@ -24,21 +39,25 @@ class Encoder {
         else if (this.object instanceof Array) {
             return new EncodedArray(this.object, this.translator, this.keys).toJSON();
         }
+        /* set to null skips encoding all together */
+        else if (this.object["jjjEncode"] === null) {
+            return null;
+        }        
         /* is Enum */
         else if (this.object.constructor.__isEnum()) {
             return new EncodedEnum(this.object, this.translator, this.keys).toJSON();
         }
         /* handler has been registered */
-        else if (this.translator.hasHandler(this.object.constructor)){
+        else if (this.translator.hasHandler(this.object.constructor)) {
             let handler = this.translator.getHandler(this.object.constructor);
             let encodedObject = new EncodedObject(this.object, this.translator, this.keys);
             handler.encode(encodedObject, this.object);
             return encodedObject.toJSON();
         }
         /* object handles it's self */
-        else if (typeof this.object["encode"] === "function"){
+        else if (typeof this.object["jjjEncode"] === "function") {
             let encodedObject = new EncodedObject(this.object, this.translator, this.keys);
-            this.object.encode(encodedObject);
+            this.object.jjjEncode(encodedObject);
             return encodedObject.toJSON();
         }
         /* encode object */
@@ -96,7 +115,8 @@ class EncodedArray {
     setValues(parent, current) {
         for (let i = 0; i < current.length; i++) {
             let element = current[i];
-            parent.push(new Encoder(element, this.translator, this.keys).encode());
+            let value = new Encoder(element, this.translator, this.keys).encode();
+            if (value !== null) parent.push(value);
         }
     }
     toJSON() {
@@ -141,7 +161,7 @@ class EncodedObject {
         }
     }
 
-    encode(){
+    encode() {
         for (let field in this.object) {
             this.setField(field, this.object[field]);
         }
@@ -149,7 +169,8 @@ class EncodedObject {
     }
 
     setField(name, value) {
-        this.json[Constants.FieldsParam][name] = new Encoder(value, this.translator, this.keys).encode();
+        let encodedValue = new Encoder(value, this.translator, this.keys).encode();
+        if (encodedValue !== null) this.json[Constants.FieldsParam][name] = encodedValue;
     }
 
     toJSON() {

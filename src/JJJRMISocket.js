@@ -16,6 +16,7 @@ class JJJRMISocket {
 
         this.translator.addDecodeListener(obj=>obj.__jjjWebsocket = this);
         this.translator.addEncodeListener(obj=>obj.__jjjWebsocket = this);
+        this.jjjEncode = null;
     }
 
 	getHandler(aClass) {
@@ -114,7 +115,7 @@ class JJJRMISocket {
 
         switch (rmiMessage.type) {
             case jjjrmi.JJJMessageType.FORGET:{
-                if (this.flags.CONNECT || this.flags.ONMESSAGE) console.log(this.jjjSocketName + " FORGET");
+                if (this.flags.ONMESSAGE) console.log(this.jjjSocketName + " FORGET");
                 this.translator.removeKey(rmiMessage.key);
                 break;
             }
@@ -133,6 +134,7 @@ class JJJRMISocket {
             }
             /* server originated request */
             case jjjrmi.JJJMessageType.REMOTE:{
+            if (this.flags.ONMESSAGE) console.log(`Server side originated request: ${this.jjjSocketName} ${rmiMessage.methodName}`);
                 let target = this.translator.getReferredObject(rmiMessage.ptr);
                 this.remoteMethodCallback(target, rmiMessage.methodName, rmiMessage.args);
 //                let response = new InvocationResponse(rmiMessage.uid, InvocationResponseCode.SUCCESS);
@@ -178,11 +180,11 @@ class JJJRMISocket {
 };
 
 JJJRMISocket.flags = {
-        SILENT: false,
-        CONNECT: false,
-        ONMESSAGE: false, /* show that a server object has been received and an action may be taken */
-        SENT: false,
-        RECEIVED: false, /* show the received server object, verbose shows the text as well */
+        SILENT: false, /* do not print exceptions to console */
+        CONNECT: false, /* show the subset of ONMESSAGE that deals with the initial connection */
+        ONMESSAGE: false, /* describe the action taken when a message is received */
+        SENT: false, /* show the send object, versbose shows the json text as well */
+        RECEIVED: false, /* show the received server object, verbose shows the json text as well */
         VERBOSE: false,
         ONREGISTER: false /* report classes as they are registered */
 };

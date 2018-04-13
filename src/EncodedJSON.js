@@ -1,5 +1,7 @@
 class EncodedJSON{
     constructor(json){
+        if (json === null) throw new Error("JSON object is null.");
+        if (typeof json === "undefined") throw new Error("JSON object is undefined.");  
         this.json = json;
     }
 

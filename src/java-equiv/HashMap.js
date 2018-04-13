@@ -156,7 +156,7 @@ HashMap = class HashMap {
         return this.map.values();
     }
 
-    __decode(resObj) {
+    jjjDecode(resObj) {
         let keys = null;
         let values = null;
 
@@ -175,7 +175,7 @@ HashMap = class HashMap {
         resObj.decodeField("keys", cb1);
     }
 
-    __encode(encodedObject) {
+    jjjEncode(encodedObject) {
         let keys = [];
         let values = [];
 
