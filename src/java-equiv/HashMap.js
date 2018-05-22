@@ -5,7 +5,7 @@ HashMap = class HashMap {
         this.map = new Map();
     }
     static __isTransient() {
-        return true;
+        return false;
     }
     static __getClass() {
         return "java.util.HashMap";

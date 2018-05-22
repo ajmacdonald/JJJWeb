@@ -5,7 +5,7 @@ ArrayList = class ArrayList {
         this.elementData = [];
     }
     static __isTransient() {
-        return true;
+        return false;
     }
     static __getClass() {
         return "java.util.ArrayList";

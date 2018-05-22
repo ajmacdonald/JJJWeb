@@ -116,7 +116,7 @@ class JJJRMISocket {
         switch (rmiMessage.type) {
             case jjjrmi.JJJMessageType.FORGET:{
                 if (this.flags.ONMESSAGE) console.log(this.jjjSocketName + " FORGET");
-                this.translator.removeKey(rmiMessage.key);
+                this.translator.removeByKey(rmiMessage.key);
                 break;
             }
             case jjjrmi.JJJMessageType.READY:{
