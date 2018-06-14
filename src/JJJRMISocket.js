@@ -3,18 +3,6 @@ let jjjrmi = require("./gen/package");
 let ArrayList = require("./java-equiv/ArrayList");
 let HashMap = require("./java-equiv/HashMap");
 
-let ServerSideExceptionMessage = require("./gen/ServerSideExceptionMessage");
-let RejectedConnectionMessage = require("./gen/RejectedConnectionMessage");
-let ReadyMessage = require("./gen/ReadyMessage");
-let MethodResponse = require("./gen/MethodResponse");
-let MethodRequest = require("./gen/MethodRequest");
-let JJJMessageType = require("./gen/JJJMessageType");
-let JJJMessage = require("./gen/JJJMessage");
-let ForgetMessage = require("./gen/ForgetMessage");
-let ClientRequestMessage = require("./gen/ClientRequestMessage");
-let ClientMessageType = require("./gen/ClientMessageType");
-let ClientMessage = require("./gen/ClientMessage");
-
 class JJJRMISocket {
     constructor(socketName) {
         this.jjjSocketName = socketName;
@@ -97,7 +85,7 @@ class JJJRMISocket {
                 resolve: resolve,
                 reject: reject
             };
-            let packet = new MethodRequest(uid, ptr, methodName, argsArray);
+            let packet = new jjjrmi.MethodRequest(uid, ptr, methodName, argsArray);
             let encodedPacket = this.translator.encode(packet);
             if (this.flags.SENT) console.log(encodedPacket);
             let encodedString = JSON.stringify(encodedPacket, null, 4);
