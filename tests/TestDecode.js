@@ -1,9 +1,7 @@
- require('rootpath')();
-let Constants = require("src/Constants");
-let Translator = require("src/Translator");
-let Assert = require("tests/Assert");
-let testObjects = require("tests/jjjrmi.test");
-let Phonetic = require("tests/jjjrmi.test").Phonetic;
+let Translator = require("../src/Translator");
+let Assert = require("./Assert");
+let testObjects = require("./jjjrmi.test");
+let Phonetic = require("./jjjrmi.test").Phonetic;
 
 TestDecode = class TestDecode {
 	test_field_boolean() {

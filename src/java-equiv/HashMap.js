@@ -1,6 +1,4 @@
-/* global Symbol */
-
-HashMap = class HashMap {
+let HashMap = class HashMap {
     constructor() {
         this.map = new Map();
     }

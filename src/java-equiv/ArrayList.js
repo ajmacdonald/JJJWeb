@@ -1,6 +1,4 @@
-/* global Symbol */
-
-ArrayList = class ArrayList {
+let ArrayList = class ArrayList {
     constructor() {
         this.elementData = [];
     }
@@ -15,19 +13,20 @@ ArrayList = class ArrayList {
     }
     addAll(c) {
         if (typeof c === "number") throw new Error("unsupported java to js operation");
-        for (let e of c) this.add(e);
+        for (let e of c)
+            this.add(e);
     }
     isEmpty() {
         return this.size() === 0;
     }
     removeAll(c) {
-        for (let e of c){
+        for (let e of c) {
             this.remove(e);
         }
     }
     retainAll(c) {
         let newElementData = [];
-        for (let e of c){
+        for (let e of c) {
             if (this.contains(e)) newElementData.add(e);
         }
         this.elementData = newElementData;
@@ -51,7 +50,8 @@ ArrayList = class ArrayList {
         return old;
     }
     toArray(a = []) {
-        for (let i = 0; i < this.elementData.length; i++) a[i] = this.elementData[i];
+        for (let i = 0; i < this.elementData.length; i++)
+            a[i] = this.elementData[i];
         return a;
     }
     iterator() {
@@ -88,16 +88,21 @@ ArrayList = class ArrayList {
     lastIndexOf(o) {
         return this.elementData.lastIndexOf(o);
     }
-    remove(index) {
-        let r = this.elementData.splice(index, 1);
-        return r[0];
-    }
     remove(o) {
-        let r = this.elementData.splice(this.indexOf(o), 1);
+        if (typeof o === "number") return this.removeIndex(o);
+        let index = this.indexOf(o);
+        if (index === -1) return undefined;
+        let r = this.elementData.splice(index, 1);
         return r[0];
     }
     removeRange(fromIndex, toIndex) {
         this.elementData.splice(fromIndex, toIndex - fromIndex);
+    }
+    removeIndex (index) {
+        if (this.size >= index) throw new Error(`index '${index}' out of range`);
+        if (this.size < 0) throw new Error(`index '${index}' out of range`);
+        let r = this.elementData.splice(index, 1);
+        return r[0];
     }
 };
 

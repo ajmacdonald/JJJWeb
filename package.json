@@ -1,6 +1,6 @@
 {
     "name": "jjjrmi",
-    "version": "0.4.5",
+    "version": "0.4.7",
     "keywords": [
         "util",
         "functional",
@@ -10,15 +10,13 @@
     ],
     "author": "Edward Armstrong",
     "contributors": [],
-    "dependencies": {
-        "rootpath": "^0.1.2"
-    },
+    "dependencies": {},
     "main": "./src/JJJRMISocket.js",
     "files": [
         "src/**"
     ],
     "scripts": {
-        "cp": "copyfiles -f ../JJJRMI/dist/jjjrmi.partial.js src",
-        "pack-js": "npm pack"
+        "cp": "copyfiles -f ../JJJRMI/dist/gen/* src/gen",
+        "build-js": "browserify ./src/main.js -o ./dist/jjjrmi.packed.js -d"
     }
 }

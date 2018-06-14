@@ -41,6 +41,9 @@ class RestoredObject {
         }
 
         this.translator.notifyDecode(newInstance);
+        if (typeof newInstance.jjjOnDecode === "function"){
+            newInstance.jjjOnDecode();
+        }
         return newInstance;
     }
     decodeField(name, callback) {
@@ -59,7 +62,7 @@ class RestoredObject {
         return this.json.get(Constants.TypeParam);
     }
 }
-;
+
 class RestoredArray {
     constructor(json, translator) {
         this.json = json;
@@ -77,7 +80,7 @@ class RestoredArray {
         return newInstance;
     }
 }
-;
+
 class Decoder {
     constructor(json, translator) {
         this.json = json;
@@ -115,5 +118,5 @@ class Decoder {
         this.decode(this.callback);
     }
 }
-;
+
 module.exports = Decoder;

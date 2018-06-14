@@ -1,5 +1,3 @@
-
-
 repeat = function (string, count) {
     let s = "";
     while (count-- > 0) s += string;
