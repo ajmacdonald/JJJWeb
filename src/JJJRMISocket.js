@@ -194,6 +194,12 @@ JJJRMISocket.registerClass = function(aClass){
     if (typeof aClass.__getClass !== "function") throw new Error(`in Class ${aClass.constructor.name} method __getClass of type ${typeof aClass.__getClass}`);
     if (JJJRMISocket.flags.ONREGISTER) console.log(`Register ${aClass.__getClass()}`);
     JJJRMISocket.classes.set(aClass.__getClass(), aClass);
+    
+    for (let field in aClass){
+        if (typeof field === "function" && field.__getClass === "function"){
+            JJJRMISocket.registerClass(field);
+        }
+    }
 };
 
 /* for registering all classes returned from generated JS */

@@ -1,5 +1,5 @@
 let Constants = require("./Constants");
-let EncodedJSON = require("./gen/EncodedJSON");
+let EncodedJSON = require("./EncodedJSON");
 
 class RestoredObject {
     constructor(json, translator) {
