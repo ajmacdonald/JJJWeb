@@ -190,13 +190,21 @@ JJJRMISocket.flags = {
 JJJRMISocket.classes = new Map();
 
 JJJRMISocket.registerClass = function(aClass){
-    if (typeof aClass !== "function") throw new Error(`paramater 'class' of method 'registerClass' is '${typeof aClass.__getClass}', expected 'function'`);
-    if (typeof aClass.__getClass !== "function") throw new Error(`in Class ${aClass.constructor.name} method __getClass of type ${typeof aClass.__getClass}`);
+    if (typeof aClass !== "function"){
+        console.log(aClass);
+        throw new Error(`paramater 'class' of method 'registerClass' is '${typeof aClass}', expected 'function'`);
+    }
+    if (typeof aClass.__getClass !== "function"){
+        throw new Error(`in Class ${aClass.constructor.name} method __getClass of type ${typeof aClass.__getClass}`);
+    }
+    
     if (JJJRMISocket.flags.ONREGISTER) console.log(`Register ${aClass.__getClass()}`);
+    
     JJJRMISocket.classes.set(aClass.__getClass(), aClass);
     
-    for (let field in aClass){
-        if (typeof field === "function" && field.__getClass === "function"){
+    for (let field in aClass){     
+        console.log(aClass.__getClass() + " " + field);
+        if (typeof aClass[field] === "function" && aClass[field].__getClass === "function"){
             JJJRMISocket.registerClass(field);
         }
     }
@@ -204,7 +212,9 @@ JJJRMISocket.registerClass = function(aClass){
 
 /* for registering all classes returned from generated JS */
 JJJRMISocket.registerPackage = function(package){
-    for (let aClass in package) JJJRMISocket.registerClass(package[aClass]);
+    for (let aClass in package){
+        JJJRMISocket.registerClass(package[aClass]);
+    }
 };
 
 /* register the classes required for JJJRMISocket */
