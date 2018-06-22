@@ -203,7 +203,6 @@ JJJRMISocket.registerClass = function(aClass){
     JJJRMISocket.classes.set(aClass.__getClass(), aClass);
     
     for (let field in aClass){     
-        console.log(aClass.__getClass() + " " + field);
         if (typeof aClass[field] === "function" && aClass[field].__getClass === "function"){
             JJJRMISocket.registerClass(field);
         }
