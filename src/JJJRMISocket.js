@@ -17,15 +17,15 @@ class JJJRMISocket {
         this.jjjEncode = null;
     }
 
-	getHandler(aClass) {
-		return this.translator.getHandler(aClass);
-	}
-	hasHandler(aClass) {
-		return this.translator.hasHandler(aClass);
-	}
-	setHandler(aClass, handler) {
-		this.translator.setHandler(aClass, handler);
-	}
+    getHandler(aClass) {
+        return this.translator.getHandler(aClass);
+    }
+    hasHandler(aClass) {
+        return this.translator.hasHandler(aClass);
+    }
+    setHandler(aClass, handler) {
+        this.translator.setHandler(aClass, handler);
+    }
 
     async connect(url) {
         if (this.flags.CONNECT) console.log(`${this.jjjSocketName} connecting`);
@@ -183,7 +183,7 @@ JJJRMISocket.flags = {
         ONMESSAGE: false, /* describe the action taken when a message is received */
         SENT: false, /* show the send object, versbose shows the json text as well */
         RECEIVED: false, /* show the received server object, verbose shows the json text as well */
-        VERBOSE: false,
+        VERBOSE: false, /* print raw text for SENT / RECEIVED */
         ONREGISTER: false /* report classes as they are registered */
 };
 
@@ -203,8 +203,9 @@ JJJRMISocket.registerClass = function(aClass){
     JJJRMISocket.classes.set(aClass.__getClass(), aClass);
     
     for (let field in aClass){     
-        if (typeof aClass[field] === "function" && aClass[field].__getClass === "function"){
-            JJJRMISocket.registerClass(field);
+        console.log(`considering ${aClass.__getClass()}.${field}`);
+        if (typeof aClass[field] === "function" && typeof aClass[field].__getClass === "function"){
+            JJJRMISocket.registerClass(aClass[field]);
         }
     }
 };
