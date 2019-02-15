@@ -211,9 +211,9 @@ JJJRMISocket.registerClass = function(aClass){
 };
 
 /* for registering all classes returned from generated JS */
-JJJRMISocket.registerPackage = function(package){
-    for (let aClass in package){
-        JJJRMISocket.registerClass(package[aClass]);
+JJJRMISocket.registerPackage = function(packageFile){
+    for (let aClass in packageFile){
+        JJJRMISocket.registerClass(packageFile[aClass]);
     }
 };
 
