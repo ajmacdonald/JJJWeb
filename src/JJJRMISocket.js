@@ -1,3 +1,4 @@
+"use strict";
 let Translator = require("./Translator");
 let jjjserver = require("jjjserver");
 let ArrayList = require("./java-equiv/ArrayList");

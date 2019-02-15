@@ -1,6 +1,6 @@
 {
     "name": "jjjrmi",
-    "version": "0.4.11",
+    "version": "0.4.13",
     "keywords": [
         "util",
         "functional",
@@ -11,7 +11,7 @@
     "author": "Edward Armstrong",
     "contributors": [],
     "dependencies": {
-        "jjjserver": "file:../JJJRMI/dist/gen/jjjserver"
+        "jjjserver": "^0.4.19"
     },
     "main": "./src/JJJRMISocket.js",
     "files": [
